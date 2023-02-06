@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <!--
+		level指定日志级别，从低到高优先级：
+		ALL < TRACE < DEBUG < INFO <WRAN < ERROR <FATA < OFF
+	-->
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+    <Appenders>
+        <!-- 输出日志信息到控制台 -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <!-- 控制日志输入的格式 -->
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+    </Appenders>
+
+</Configuration>
