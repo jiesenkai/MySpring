@@ -72,7 +72,7 @@ public class ClassXMLContent implements ApplicationContent{
                 String className = beanELT.attributeValue("class");
                 //反射机制到该类
                 Class<?> aClass = Class.forName(className);
-                // 获取该bean下的property标签的属性 为一个集合
+                //  获取该bean下的property标签的属性 为一个集合
                 List<Element> propertys = beanELT.elements("property");
                 // 遍历property属性
                 propertys.forEach(property->{
@@ -84,24 +84,56 @@ public class ClassXMLContent implements ApplicationContent{
                         // 获取ref属性值
                         String ref = property.attributeValue("ref");
                         // bean中属性的TYPE
-                        String propertyType = aClass.getDeclaredField(name).getType().getSimpleName();
+                        String propertyTypeName = aClass.getDeclaredField(name).getType().getSimpleName();
                         // 获取set方法名
                         String setMethodName = "set"+name.toUpperCase().charAt(0)+name.substring(1);
                         // 获取set方法
-                        Method declaredMethod = aClass.getDeclaredMethod(setMethodName,aClass.getDeclaredField(name).getType());
+                        Method declaredMethod = aClass.getDeclaredMethod(setMethodName, aClass.getDeclaredField(name).getType());
+                        // value值的的真实值
+                        Object key =null;
                         //判断注入的属性是value还是ref
                         if (value != null) {
-                            // 获取基本类型的反射方法valueOf
-                            double a=2.2;
-
-                            Method valueOf = aClass.getDeclaredField(name).getType().getDeclaredMethod("valueOf");
-                            Object typeClass = aClass.getDeclaredField(name).getType().newInstance();
-                            Object invoke = valueOf.invoke(typeClass, value);
-
-
+                                // 转换为指定数据类型
+                                switch (propertyTypeName){
+                                    case "String":
+                                        key=value;
+                                        break;
+                                    case "int":
+                                        key=Integer.parseInt(value);
+                                        break;
+                                    case "long":
+                                        key = Long.parseLong(value);
+                                        break;
+                                    case "boolean":
+                                        key = Boolean.parseBoolean(value);
+                                        break;
+                                    case "byte":
+                                        key = Byte.parseByte(value);
+                                        break;
+                                    case "char":
+                                        key = value.charAt(0);
+                                        break;
+                                    case "short":
+                                        key = Short.parseShort(value);
+                                        break;
+                                    case "float":
+                                        key = Float.parseFloat(value);
+                                        break;
+                                    case "double":
+                                        key = Double.parseDouble(value);
+                                        break;
+                                    case "Integer":
+                                        key = Integer.valueOf(value);
+                                        break;
+                                    case "Double":
+                                            key = Double.valueOf(value);
+                                            break;
+                                }
+                                // 进行value注入属性
+                            declaredMethod.invoke(singleObject.get(id),key);
                         }
                         if (ref !=null){
-                            // 进行注入属性
+                            // 进行ref注入属性
                             declaredMethod.invoke(singleObject.get(id),singleObject.get(ref));
                         }
 
@@ -113,8 +145,6 @@ public class ClassXMLContent implements ApplicationContent{
                     } catch (InvocationTargetException e) {
                         e.printStackTrace();
                     } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    } catch (InstantiationException e) {
                         e.printStackTrace();
                     }
                 });
